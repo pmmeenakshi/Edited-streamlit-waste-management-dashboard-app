@@ -9,9 +9,14 @@ from folium.plugins import MarkerCluster
 from streamlit_folium import st_folium
 import matplotlib.pyplot as plt
 from datetime import date
-from pathlib import Path
+
 import os
 import streamlit as st, folium, streamlit_folium, pandas as pd
+import streamlit as st, folium, streamlit_folium
+st.write({"streamlit": st.__version__,
+          "folium": folium.__version__,
+          "streamlit_folium": streamlit_folium.__version__})
+
 st.write("Libs OK:",
          {"streamlit": st.__version__,
           "folium": folium.__version__,
@@ -322,6 +327,7 @@ else:
 # ===== OPTIONAL DATA PREVIEW =====
 with st.expander("Data sample (filtered)"):
     st.dataframe(filtered, use_container_width=True)
+
 
 
 
