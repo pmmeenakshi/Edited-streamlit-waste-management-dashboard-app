@@ -1,3 +1,4 @@
+from pathlib import Path
 # pythonfile.py — Interactive Waste Management Dashboard (new dataset + city boundaries)
 import streamlit as st
 import pandas as pd
@@ -310,3 +311,4 @@ else:
 # ===== OPTIONAL DATA PREVIEW =====
 with st.expander("Data sample (filtered)"):
     st.dataframe(filtered, use_container_width=True)
+
