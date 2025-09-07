@@ -13,20 +13,6 @@ from datetime import date
 import os
 import streamlit as st, folium, streamlit_folium, pandas as pd
 import streamlit as st, folium, streamlit_folium
-st.write({"streamlit": st.__version__,
-          "folium": folium.__version__,
-          "streamlit_folium": streamlit_folium.__version__})
-
-st.write("Libs OK:",
-         {"streamlit": st.__version__,
-          "folium": folium.__version__,
-          "streamlit_folium": streamlit_folium.__version__})
-
-st.write("App dir:", Path(__file__).parent.resolve())
-st.write("CSV exists:", (Path(__file__).parent / "New_dataset2.csv").exists())
-st.write("Dir listing:", os.listdir(Path(__file__).parent))
-
-st.set_page_config(page_title="Interactive Waste Management Dashboard", layout="wide")
 
 
 # ---------- CONFIG ----------
@@ -327,6 +313,7 @@ else:
 # ===== OPTIONAL DATA PREVIEW =====
 with st.expander("Data sample (filtered)"):
     st.dataframe(filtered, use_container_width=True)
+
 
 
 
