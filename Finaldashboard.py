@@ -10,6 +10,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import streamlit as st
+
+
 from streamlit_folium import st_folium
 import folium
 from folium.plugins import MarkerCluster,HeatMap
@@ -434,7 +436,7 @@ def popup_charts_for_comm(dfl_filtered: pd.DataFrame, community_id: str):
     d_ton = dm[dm["Metric"] == "Tonnage"][["MonthKey", "Value"]].copy()
     if not d_ton.empty:
         d_ton["MonthLabel"] = [period.to_timestamp().strftime("%b") for period in d_ton["MonthKey"]]
-        fig, ax = plt.subplots(figsize=(3.1, 1.6), dpi=120)
+        fig, ax = plt.subplots(figsize=(2.7, 1.4), dpi=120)
         ax.plot(d_ton["MonthLabel"], d_ton["Value"], marker="o", lw=1.6, color=BRAND)
         ax.spines["right"].set_visible(False)
         ax.spines["top"].set_visible(False)
@@ -459,52 +461,56 @@ def popup_charts_for_comm(dfl_filtered: pd.DataFrame, community_id: str):
             dry_month = cur
             break
 
+
+
+
     if dry_month is not None:
         d = dry_month.groupby("MonthKey", as_index=False)["Value"].sum().sort_values("MonthKey")
         co2_vals = (d["Value"] * CO2_PER_KG_DRY).clip(lower=0.0).to_numpy()
         labels = [p.to_timestamp().strftime("%b") for p in d["MonthKey"]]
         colors = _distinct_colors(len(labels))
 
-
-
-
-
-        # Matplotlib donut (thicker ring + readable labels)
-        fig, ax = plt.subplots(figsize=(2.6, 2.6), dpi=120)
+        # --- Donut chart with slice labels ---
+        fig, ax = plt.subplots(figsize=(2.3, 2.3), dpi=120)
         wedges, texts, autotexts = ax.pie(
             co2_vals,
-            labels=labels,
-            autopct=lambda pct: (f'{pct:.1f}%\n{int(round(pct/100.0*sum(co2_vals)))} kg') if pct > 0 else '',
-            wedgeprops=dict(width=0.60, edgecolor='white', linewidth=1.2),  # thicker ring
+            labels=labels,  # ✅ show month beside slice
+            autopct=lambda pct: (f'{pct:.1f}%') if pct > 0 else '',
+            wedgeprops=dict(width=0.60, edgecolor='white', linewidth=1.2),
             startangle=90,
             colors=colors,
-            pctdistance=0.67
+            pctdistance=0.7,
+            labeldistance=1.05   # slight spacing between label and slice
         )
         ax.set(aspect="equal")
 
-        # format slice labels (month labels)
-        for text in texts:
-            text.set_fontsize(9)
-            text.set_color(BRAND)
+        # Format labels & percentages
+        for t in texts:
+            t.set_fontsize(8)
+            t.set_color("#36204D")
+            t.set_weight("bold")
 
-        # choose autotext color based on slice brightness (so text is readable)
         from matplotlib.colors import to_rgb
         for wedge, autotext in zip(wedges, autotexts):
-            face_rgba = wedge.get_facecolor()
-            r, g, b = face_rgba[:3]
-            lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+            r, g, b = wedge.get_facecolor()[:3]
+            lum = 0.2126*r + 0.7152*g + 0.0722*b
             autotext.set_color('#ffffff' if lum < 0.6 else '#222222')
-            autotext.set_fontsize(9)
+            autotext.set_fontsize(8)
             autotext.set_weight('bold')
 
-        # center text
-        ax.text(0, 0, "CO₂\nAverted", ha="center", va="center", fontsize=10, color='purple', fontweight="bold")
+        # Center text inside donut
+        ax.text(0, 0, "CO₂\nAverted", ha="center", va="center",
+                fontsize=10, color='purple', fontweight="bold")
 
         plt.tight_layout(pad=0.3)
         donut_img = _to_data_uri(fig, w=260)
         plt.close(fig)
 
-    
+        # --- Legend below the donut ---
+        
+
+        
+        donut_img = f"<div style='text-align:center;'>{donut_img}</div>"
     # return HTML fragments (bar_img and donut_img)
     return bar_img, donut_img
 
@@ -557,19 +563,19 @@ with tab_map:
         valid = dfw_filt.dropna(subset=["Lat", "Lon"])
         valid = jitter_duplicates(valid)
         legend_html = """
-        <div style='padding:12px 18px 12px 18px; background:#191b1f; border-radius:16px; width:305px; border:1.5px solid #DDD; box-shadow: 1px 2px 12px #0003; margin-bottom:14px; margin-left:4px; color:#fff;'>
-        <b style='font-size:17px; color:#fff;'>Density Heatmap Key</b><br/>
-        <div style='display:flex; align-items:center; margin-top:4px; margin-bottom:2px;'>
-            <div style='background:#8fcadd;width:35px;height:14px;'></div>
-            <div style='background:#6ee96e;width:35px;height:14px;'></div>
-            <div style='background:#ffff62;width:35px;height:14px;'></div>
-            <div style='background:#ffba00;width:35px;height:14px;'></div>
-            <div style='background:#d73027;width:35px;height:14px;'></div>
+        <div style='padding:12px 18px; background:#191b1f; border-radius:16px; width:305px; border:1.5px solid #DDD; box-shadow:1px 2px 12px #0003; margin-bottom:14px; margin-left:4px; color:#fff;'>
+        <b style='font-size:17px; color:#fff;'>Participation % Scale</b><br/>
+        <div style='display:flex; align-items:center; margin-top:6px;'>
+            <div style='background:#cc0002;width:35px;height:14px;'></div>
+            <div style='background:##DB680A;width:35px;height:14px;'></div>
+            <div style='background:#FFFF00;width:35px;height:14px;'></div>
+            <div style='background:#00FF00;width:35px;height:14px;'></div>
             <span style='margin-left:14px;font-size:14px; color:#fff; font-weight:600;'>Low → High</span>
         </div>
-        <span style='font-size:13px; color:#fff;'>Density / Value</span>
+        <span style='font-size:13px; color:#fff;'>Participation Intensity</span>
         </div>
         """
+
 
         lat0 = float(valid["Lat"].mean())
         lon0 = float(valid["Lon"].mean())
@@ -664,8 +670,15 @@ with tab_map:
                     blur=15,
                     min_opacity=0.25,
                     max_zoom=12,
-                    gradient=None  # use default gradient (green→yellow→red)
+                    # ✅ Custom gradient (reversed logic)
+                    gradient={
+                        0.0: "#cc0002",  # red = lowest participation
+                        0.33: "#DB680A", # orange
+                        0.66: "#FFFF00", # yellow
+                        1.0: "#00FF00",  # green = highest participation
+                    }
                 ).add_to(fmap)
+                
 
         
 
@@ -688,9 +701,10 @@ with tab_map:
             # build popup HTML (always do this)
 
             popup_html = f"""
-            <div style='font-family:Poppins; width:520px; padding:8px;'>
+            <div style='font-family:Poppins; width:420px; padding:6px;'>
 
-            <div style='display:flex; flex-direction:row;'>
+            <div style='display:flex; flex-direction:row; flex-wrap:wrap; justify-content:space-between; align-items:center;'>
+
 
                 <!-- LEFT COLUMN -->
                 <div style='flex:1.1; min-width:180px; max-width:230px; display:flex; flex-direction:column; align-items:flex-start;'>
@@ -755,7 +769,7 @@ with tab_map:
                 fill_color="#333333",
                 fill_opacity=0.85,
                 tooltip=folium.Tooltip(f"{comm} • {pin}"),
-                popup=folium.Popup(popup_html, max_width=420),
+                popup=folium.Popup(popup_html, max_width=380),
             ).add_to(cluster)
 
 
