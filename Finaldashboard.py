@@ -567,7 +567,7 @@ with tab_map:
         <b style='font-size:17px; color:#fff;'>Participation % Scale</b><br/>
         <div style='display:flex; align-items:center; margin-top:6px;'>
             <div style='background:#cc0002;width:35px;height:14px;'></div>
-            <div style='background:##DB680A;width:35px;height:14px;'></div>
+            <div style='background:#DB680A;width:35px;height:14px;'></div>
             <div style='background:#FFFF00;width:35px;height:14px;'></div>
             <div style='background:#00FF00;width:35px;height:14px;'></div>
             <span style='margin-left:14px;font-size:14px; color:#fff; font-weight:600;'>Low → High</span>
@@ -1043,5 +1043,6 @@ with tab_insights:
         key="dl_trends_bottom",
     )
     st.dataframe(dfl_filt, use_container_width=True, height=420)
+
 
 
