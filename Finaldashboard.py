@@ -1,7 +1,7 @@
 
 
 import re
-import io
+import io 
 import base64
 import mimetypes
 from pathlib import Path
@@ -838,145 +838,99 @@ with tab_map:
                     bar_img = popup_charts_for_comm(dfl_filt, comm)
                 except Exception:
                     bar_img = ""
-
+            
+            chart_block = ""
+            if show_popup_charts and bar_img:
+                chart_block = f"""
+                <hr style='margin:12px 0 10px 0; width:98%; border:0.8px solid #ddd;'>
+                <div style='width:99%; margin:-6px auto 0 auto; text-align:left;'>
+                    <div style='font-size:16px; margin-bottom:5px; color:#36204D; font-weight:700;'>KGs</div>
+                    {bar_img}
+                </div>
+                """
             
             community_id_val = valid.iloc[i]["community_id"] if "community_id" in valid.columns else ""
-
-            # build popup HTML
+            
+            # ---------------------------
+            # Popup HTML (ONLY ONE f-string)
+            # ---------------------------
             popup_html = f"""
             <div style='font-family:Poppins; width:420px; padding:6px;'>
-
-            <div style='display:flex; flex-direction:row; flex-wrap:wrap; justify-content:space-between; align-items:center;'>
-
-                <!-- LEFT COLUMN -->
-                <div style='flex:1.1; min-width:180px; max-width:230px; display:flex; flex-direction:column; align-items:flex-start;'>
-
-                <!-- TOP: Community + Pincode + City -->
-                <div style='width:100%; margin-bottom:8px;'>
-                    <div style='display:flex; align-items:center; flex-wrap:wrap;'>
-                        <div style='font-size:20px; font-weight:700; color:#36204D;'>{comm}</div>
-                        <div style='font-size:15px; color:#555; margin-left:10px;'>({pin})</div>
-                    </div>
-
-                    <div style='font-size:13px; color:#777;'>Community ID: {community_id_val}</div>
-                    <div style='font-size:13px; color:#777;'>City: {city}</div>
-                </div>
-                <!-- STATS -->
-                <div style='font-size:15px; margin-bottom:5px; line-height:1.25;'>
-                    <img src="{RECYCLE_ICON}" width="20" style="vertical-align:middle; margin-right:6px;">
-                    <b style="font-size:16px; color:#36204D;">{stats['seg_pct']:.1f}% Segregation</b>
-                </div>
-                <div style='font-size:15px; margin-bottom:5px;'>
-                    <img src="{HOUSE_ICON}" width="20" style="vertical-align:middle; margin-right:6px;">
-                    <b style="font-size:16px; color:#36204D;">{stats['households']:,.0f} Households</b>
-                </div>
-
-                </div>  <!-- end LEFT COLUMN -->
-
-                <!-- RIGHT COLUMN -->
-                <div style='
-                    flex:1.2;
-                    min-width:200px;
-                    display:flex;
-                    flex-direction:column;
-                    align-items:center;
-                    padding-left:6px;
-                '>
-
-                    <!-- TREES -->
-                    <div style='
-                        display:flex;
-                        align-items:center;
-                        margin-bottom:16px;
-                        width:100%;
-                        justify-content:center;
-                    '>
-                        <img src="{TREE_ICON}" width="48" style="margin-right:6px;">
-                        <div style='text-align:center; min-width:110px;'>
-                            <div style='
-                                font-size:22px;
-                                font-weight:800;
-                                color:#36204D;
-                                line-height:1.1;
-                            '>
-                                ~ {stats['trees']:,.1f}
+            
+                <div style='display:flex; flex-direction:row; flex-wrap:wrap;
+                            justify-content:space-between; align-items:center;'>
+            
+                    <div style='flex:1.1; min-width:180px; max-width:230px;
+                                display:flex; flex-direction:column; align-items:flex-start;'>
+            
+                        <div style='width:100%; margin-bottom:8px;'>
+                            <div style='display:flex; align-items:center; flex-wrap:wrap;'>
+                                <div style='font-size:20px; font-weight:700; color:#36204D;'>{comm}</div>
+                                <div style='font-size:15px; color:#555; margin-left:10px;'>({pin})</div>
                             </div>
-                            <div style='
-                                font-size:15px;
-                                font-weight:600;
-                                color:#555;
-                            '>
-                                Trees Saved
-                            </div>
+                            <div style='font-size:13px; color:#777;'>Community ID: {community_id_val}</div>
+                            <div style='font-size:13px; color:#777;'>City: {city}</div>
+                        </div>
+            
+                        <div style='font-size:15px; margin-bottom:5px;'>
+                            <b>{stats["seg_pct"]:.1f}% Segregation</b>
+                        </div>
+            
+                        <div style='font-size:15px; margin-bottom:5px;'>
+                            <b>{stats["households"]:,.0f} Households</b>
                         </div>
                     </div>
-
-                    <!-- CO2 -->
-                    <div style='
-                        display:flex;
-                        align-items:center;
-                        width:100%;
-                        justify-content:center;
-                    '>
-                        <img src="{CO2_ICON}" width="48" style="margin-right:6px;">
-                        <div style='text-align:center; min-width:110px;'>
-                            <div style='
-                                font-size:22px;
-                                font-weight:800;
-                                color:#36204D;
-                                line-height:1.1;
-                            '>
-                                ~ {format_co2_value(stats['co2'])}
-                            </div>
-                            <div style='
-                                font-size:15px;
-                                font-weight:600;
-                                color:#555;
-                            '>
-                                CO<sub>2</sub> averted
-                            </div>
+            
+                    <div style='flex:1.2; min-width:200px;
+                                display:flex; flex-direction:column;
+                                align-items:center; padding-left:6px;'>
+            
+                        <div style='margin-bottom:14px; text-align:center;'>
+                            <div style='font-size:22px; font-weight:800;'>~ {stats["trees"]:,.1f}</div>
+                            <div style='font-size:15px;'>Trees Saved</div>
+                        </div>
+            
+                        <div style='text-align:center;'>
+                            <div style='font-size:22px; font-weight:800;'>~ {format_co2_value(stats["co2"])}</div>
+                            <div style='font-size:15px;'>CO₂ averted</div>
                         </div>
                     </div>
-
                 </div>
-                
-
-
-            </div>
-
-           
-            <hr style='margin:6px 0 6px 0; width:98%; border:0.8px solid #ddd;'>
-
-            <!-- BOTTOM: Tonnage Line Chart -->
-            {""
-            if not show_popup_charts else f"""
-            <hr style='margin:12px 0 10px 0; width:98%; border:0.8px solid #ddd;'>
-            <div style='width:99%; margin:-6px auto 0 auto; text-align:left;'>
-                <div style='font-size:16px; margin-bottom:5px; color:#36204D; font-weight:700;'>KGs</div>
-                {bar_img}
-            </div>
-            """}
+            
+                <hr style='margin:6px 0 6px 0; width:98%; border:0.8px solid #ddd;'>
+            
+                {chart_block}
+            
             </div>
             """
             
-
-            # HEATMAP color for this marker
+            # ---------------------------
+            # Heatmap color (NOW WORKS)
+            # ---------------------------
             if heat_column:
                 val = valid.iloc[i][heat_column]
                 color = get_heat_color(val, vmin, vmax)
             else:
                 color = BRAND_PRIMARY
-
+            
             folium.CircleMarker(
                 location=[lat, lon],
                 radius=8,
                 color="#333333",
                 fill=True,
-                fill_color="#333333",
+                fill_color=color,
                 fill_opacity=0.85,
-                tooltip=folium.Tooltip(f"{comm} • {pin}"),
+                tooltip=f"{comm} • {pin}",
                 popup=folium.Popup(popup_html, max_width=380),
             ).add_to(cluster)
+            
+            
+
+
+
+
+
+
 
 
         if heatmap_metric != "None":
@@ -1266,5 +1220,6 @@ with tab_insights:
         key="dl_trends_bottom",
     )
     st.dataframe(dfl_filt, use_container_width=True, height=420)
+
 
 
